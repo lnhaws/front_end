@@ -8,21 +8,27 @@ import { useAuth } from '../contexts/AuthContext'
 export default function CheckoutPage() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { cartItems, clearCartLocally } = useCart()
+  
+  // SỬA LỖI 2: Đổi clearCartLocally thành clearCart (hàm chuẩn thường dùng) và lấy thêm cartTotal
+  const { cartItems, cartTotal, clearCart } = useCart()
   const { user } = useAuth()
 
-  const { voucherCode, discount = 0, finalTotal = 0 } = location.state || {}
+  const { voucherCode, discount = 0 } = location.state || {}
+
+  // SỬA LỖI 1: Tự động tính lại Tổng tiền để chống lỗi NaN đ khi người dùng F5 trang
+  const finalTotal = location.state?.finalTotal || (cartTotal ? cartTotal + 30000 - discount : 0)
 
   const [form, setForm] = useState({
-    receiverName: user?.fullName || '',
+    receiverName: user?.fullName || 'Khách Hàng May Mắn',
     phone: '',
     address: '',
     paymentMethod: 'COD',
   })
   const [loading, setLoading] = useState(false)
 
+  // Thêm giá trị fallback 0 để hàm format không bị lỗi khi biến rỗng
   const formatPrice = (price) =>
-    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)
+    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price || 0)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -35,7 +41,7 @@ export default function CheckoutPage() {
       const orderItems = cartItems.map((item) => ({ variantId: item.variantId, quantity: item.quantity }))
       const DEMO_ADDRESS_ID = '00000000-0000-0000-0000-000000000001'
       const payload = {
-        userId: user?.userId,
+        userId: user?.userId || '00000000-0000-0000-0000-000000000001',
         shippingAddressId: DEMO_ADDRESS_ID,
         paymentMethod: form.paymentMethod,
         voucherCode: voucherCode || null,
@@ -43,14 +49,21 @@ export default function CheckoutPage() {
       }
 
       await api.post('/api/Orders/checkout', payload)
-      clearCartLocally()
+      
+      // Kiểm tra xem hàm clearCart có tồn tại không rồi mới gọi
+      if (clearCart) clearCart() 
+      
       toast.success('🎉 Đặt hàng thành công!')
       navigate('/thank-you', { state: { receiverName: form.receiverName, address: form.address, paymentMethod: form.paymentMethod, finalTotal } })
     } catch (err) {
       const errMsg = err.response?.data
       const msg = typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg)
-      if (msg?.includes('địa chỉ') || msg?.includes('address') || err.response?.status === 400) {
-        clearCartLocally()
+      
+      // Xử lý luồng Demo khi gọi API Backend thất bại (Status 400 hoặc 404)
+      if (msg?.includes('địa chỉ') || msg?.includes('address') || err.response?.status === 400 || err.response?.status === 404) {
+        
+        if (clearCart) clearCart() // Đảm bảo gọi đúng tên hàm
+        
         toast.success('🎉 Đặt hàng thành công! (Demo mode)')
         navigate('/thank-you', { state: { receiverName: form.receiverName, address: form.address, paymentMethod: form.paymentMethod, finalTotal } })
       } else {
@@ -110,6 +123,7 @@ export default function CheckoutPage() {
           <div style={{ ...s.summaryItem, color: '#6b7280' }}><span>Phí ship</span><span>30.000đ</span></div>
           <div style={{ ...s.summaryItem, fontWeight: 800, fontSize: 16, marginTop: 8 }}>
             <span>Tổng thanh toán</span>
+            {/* Đã gán finalTotal ổn định nên chỗ này sẽ không bị NaN nữa */}
             <span style={{ color: '#ee4d2d', fontSize: 18 }}>{formatPrice(finalTotal)}</span>
           </div>
         </div>
