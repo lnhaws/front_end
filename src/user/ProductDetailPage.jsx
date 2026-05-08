@@ -86,7 +86,8 @@ export default function ProductDetailPage() {
         <div style={s.productGrid}>
           <div style={s.imgBox}>
             {product.imageUrl ? (
-              <img src={product.imageUrl} alt={product.name} style={s.img} />
+              /* Đã thêm hàm replace để dùng proxy Vercel */
+              <img src={product.imageUrl.replace('http://asp-lenhuthao.somee.com', '')} alt={product.name} style={s.img} />
             ) : (
               <div style={s.imgPlaceholder}>📦</div>
             )}
