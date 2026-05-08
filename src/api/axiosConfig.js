@@ -1,7 +1,10 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://localhost:7226',
+  // SỬA DÒNG NÀY: 
+  // Nếu đang code ở máy (development) thì gọi localhost.
+  // Nếu đã đẩy lên Vercel (production) thì gọi '/' để Vercel Proxy tự lo.
+  baseURL: import.meta.env.MODE === 'development' ? 'https://localhost:7226' : '/',
   headers: { 'Content-Type': 'application/json' },
 })
 
