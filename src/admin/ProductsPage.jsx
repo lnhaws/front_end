@@ -138,8 +138,8 @@ export default function ProductsPage() {
               <tr key={product.id} style={{ background: selectedIds.includes(product.id) ? '#fff5f3' : '#fff' }}>
                 <td style={s.td}><input type="checkbox" checked={selectedIds.includes(product.id)} onChange={() => toggleSelect(product.id)} /></td>
                 <td style={s.td}>
-                  {/* Đã cập nhật replace http thành https ở đây */}
-                  {product.imageUrl ? <img src={product.imageUrl.replace('http://', 'https://')} alt={product.name} style={s.thumb} /> : <div style={s.thumbPlaceholder}>📦</div>}
+                  {/* Cắt bỏ domain Somee để dùng đường dẫn tương đối cho Vercel Proxy */}
+                  {product.imageUrl ? <img src={product.imageUrl.replace('http://asp-lenhuthao.somee.com', '')} alt={product.name} style={s.thumb} /> : <div style={s.thumbPlaceholder}>📦</div>}
                 </td>
                 <td style={{ ...s.td, fontWeight: 600 }}>{product.name}</td>
                 <td style={s.td}><span style={s.catBadge}>{product.categoryName}</span></td>
@@ -192,8 +192,8 @@ export default function ProductsPage() {
                 
                 {form.imageUrl && (
                   <img 
-                    // Đã cập nhật replace http thành https ở form preview
-                    src={form.imageUrl.replace('http://', 'https://')} 
+                    // Cắt bỏ domain Somee để dùng đường dẫn tương đối cho Preview
+                    src={form.imageUrl.replace('http://asp-lenhuthao.somee.com', '')} 
                     alt="Preview" 
                     style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 8, border: '1px solid #e5e7eb' }} 
                   />
