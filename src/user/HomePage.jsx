@@ -85,7 +85,8 @@ export default function HomePage() {
               <div style={grid.card}>
                 <div style={grid.imgBox}>
                   {product.imageUrl ? (
-                    <img src={product.imageUrl} alt={product.name} style={grid.img} />
+                    /* Đã thêm hàm replace để dùng proxy Vercel */
+                    <img src={product.imageUrl.replace('http://asp-lenhuthao.somee.com', '')} alt={product.name} style={grid.img} />
                   ) : (
                     <div style={grid.placeholder}>📦</div>
                   )}
